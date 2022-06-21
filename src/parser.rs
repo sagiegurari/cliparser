@@ -96,7 +96,19 @@ fn parse_arguments(arguments_line: &[&str], spec: &CliSpec, _cli_parsed: &mut Cl
         return false;
     }
 
-    let _argument_in_scope: Option<&Argument> = None;
+    let argument_spec_in_scope: Option<&Argument> = None;
+    let started_positional = false;
+    let mut values = vec![];
+    for argument_raw in arguments_line {
+        if started_positional {
+            values.push(argument_raw.to_string());
+        } else {
+            match argument_spec_in_scope {
+                Some(_argument_spec) => (),
+                None => (),
+            }
+        }
+    }
     // TODO IML THIS
     false
 }
