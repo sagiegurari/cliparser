@@ -7,7 +7,7 @@
 #[path = "./parser_test.rs"]
 mod parser_test;
 
-use crate::types::{Argument, CliParsed, CliSpec, Command, ParserError};
+use crate::types::{CliParsed, CliSpec, Command, ParserError};
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -96,7 +96,7 @@ fn parse_arguments(arguments_line: &[&str], spec: &CliSpec, _cli_parsed: &mut Cl
         return false;
     }
 
-    let argument_spec_in_scope: Option<&Argument> = None;
+    let mut argument_spec_in_scope = None;
     let started_positional = false;
     let mut values = vec![];
     for argument_raw in arguments_line {
@@ -105,12 +105,26 @@ fn parse_arguments(arguments_line: &[&str], spec: &CliSpec, _cli_parsed: &mut Cl
         } else {
             match argument_spec_in_scope {
                 Some(_argument_spec) => (),
-                None => (),
+                None => {
+                    // search for argument in arguments spec
+                    for argument_spec in &spec.arguments {
+                        for key in &argument_spec.key {
+                            if key == argument_raw {
+                                argument_spec_in_scope = Some(argument_spec);
+                                break;
+                            }
+                        }
+                    }
+
+                    // TODO IMPL
+
+                    ()
+                }
             }
         }
     }
     // TODO IML THIS
-    false
+    true
 }
 
 fn validate_input(command_line: &Vec<&str>, spec: &CliSpec) -> Result<(), ParserError> {
