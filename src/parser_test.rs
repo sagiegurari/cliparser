@@ -1,4 +1,5 @@
 use super::*;
+use std::collections::{HashMap, HashSet};
 
 #[test]
 fn parse_invalid_input() {
@@ -6,6 +7,28 @@ fn parse_invalid_input() {
     let result = parse(&vec![], &cli_spec);
 
     assert!(result.is_err());
+}
+
+#[test]
+fn parse_default_value() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: Some("test_default".to_string()),
+    });
+
+    let result = parse(&vec![], &cli_spec);
+
+    assert!(result.is_ok());
+    let cli_parsed = result.unwrap();
+
+    let mut argument_values = HashMap::new();
+    argument_values.insert("testarg".to_string(), vec!["test_default".to_string()]);
+    assert_eq!(cli_parsed.arguments, HashSet::new());
+    assert_eq!(cli_parsed.argument_values, argument_values);
 }
 
 #[test]
@@ -38,7 +61,7 @@ fn parse_command_empty_command() {
     let cli_spec = CliSpec::new();
     let (valid, index) = parse_command(&vec!["test"], &cli_spec);
 
-    assert!(!valid);
+    assert!(valid);
     assert_eq!(index, 0);
 }
 
@@ -168,6 +191,161 @@ fn parse_arguments_non_empty_arguments_line_but_not_args_in_spec() {
 }
 
 #[test]
+fn parse_arguments_positional_only() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.positional_argument_name = Some("args".to_string());
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["1", "2", "3"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("args".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert(
+        "args".to_string(),
+        vec!["1".to_string(), "2".to_string(), "3".to_string()],
+    );
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
+fn parse_arguments_non_value_param_only() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::None,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["--test"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("testarg".to_string());
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, HashMap::new());
+}
+
+#[test]
+fn parse_arguments_single_value_param_only() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["--test", "value"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("testarg".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert("testarg".to_string(), vec!["value".to_string()]);
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
+fn parse_arguments_multi_value_param_only() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Multiple,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["--test", "1", "2", "3"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("testarg".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert(
+        "testarg".to_string(),
+        vec!["1".to_string(), "2".to_string(), "3".to_string()],
+    );
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
+fn parse_arguments_multi_occurence_param_only() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Multiple,
+        value_type: ArgumentValueType::Multiple,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(
+        &vec!["--test", "1", "2", "--test", "3"],
+        &cli_spec,
+        &mut cli_parsed,
+    );
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("testarg".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert(
+        "testarg".to_string(),
+        vec!["1".to_string(), "2".to_string(), "3".to_string()],
+    );
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
+fn parse_arguments_multiple_keys() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test1".to_string(), "--test2".to_string()],
+        argument_occurrence: ArgumentOccurrence::Multiple,
+        value_type: ArgumentValueType::Single,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(
+        &vec!["--test1", "1", "--test2", "2"],
+        &cli_spec,
+        &mut cli_parsed,
+    );
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("testarg".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert(
+        "testarg".to_string(),
+        vec!["1".to_string(), "2".to_string()],
+    );
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
 fn validate_input_all_empty() {
     let cli_spec = CliSpec::new();
     let result = validate_input(&vec![], &cli_spec);
@@ -184,12 +362,27 @@ fn validate_input_empty_spec() {
 }
 
 #[test]
-fn validate_input_empty_command_line() {
+fn validate_input_empty_command_line_with_command() {
     let mut cli_spec = CliSpec::new();
     cli_spec.command.push(Command::Command("cargo".to_string()));
     let result = validate_input(&vec![], &cli_spec);
 
     assert!(result.is_err());
+}
+
+#[test]
+fn validate_input_empty_command_line_no_command() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "test".to_string(),
+        key: vec!["test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::None,
+        default_value: None,
+    });
+    let result = validate_input(&vec![], &cli_spec);
+
+    assert!(result.is_ok());
 }
 
 #[test]

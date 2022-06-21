@@ -55,7 +55,7 @@ pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParse
 
 fn parse_command(command_line: &Vec<&str>, spec: &CliSpec) -> (bool, usize) {
     if spec.command.is_empty() {
-        return (false, 0);
+        return (true, 0);
     }
 
     let root_command_with_path = command_line[0];
@@ -226,7 +226,7 @@ fn parse_arguments(
 }
 
 fn validate_input(command_line: &Vec<&str>, spec: &CliSpec) -> Result<(), ParserError> {
-    if command_line.is_empty() {
+    if command_line.is_empty() && !spec.command.is_empty() {
         return Err(ParserError::InvalidCommandLine(
             "Empty command line provided".to_string(),
         ));
