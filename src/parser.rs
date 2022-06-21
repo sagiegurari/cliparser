@@ -7,7 +7,7 @@
 #[path = "./parser_test.rs"]
 mod parser_test;
 
-use crate::types::{CliParsed, CliSpec, Command, ParserError};
+use crate::types::{Argument, CliParsed, CliSpec, Command, ParserError};
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -91,12 +91,12 @@ fn parse_arguments(arguments_line: &[&str], spec: &CliSpec, _cli_parsed: &mut Cl
         return true;
     }
 
-    if spec.arguments.is_empty() {
+    if spec.arguments.is_empty() && spec.positional_argument_name.is_none() {
         // we have arguments on the command line but we do not support arguments at all
         return false;
     }
 
-    let argument_in_scope: Option<&Argument> = None;
+    let _argument_in_scope: Option<&Argument> = None;
     // TODO IML THIS
     false
 }

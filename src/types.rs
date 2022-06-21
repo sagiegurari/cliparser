@@ -96,6 +96,9 @@ pub struct CliSpec {
     pub command: Vec<Command>,
     /// A list of all possible command line arguments.
     pub arguments: Vec<Argument>,
+    /// The name of the argument that will hold all arguments after the last known key based
+    /// argument. If not defined, such positional arguments are not allowed.
+    pub positional_argument_name: Option<String>,
 }
 
 impl CliSpec {

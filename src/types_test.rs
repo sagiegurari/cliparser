@@ -24,6 +24,7 @@ fn clispec_new() {
 
     assert!(cli_spec.command.is_empty());
     assert!(cli_spec.arguments.is_empty());
+    assert!(cli_spec.positional_argument_name.is_none());
 }
 
 #[test]
