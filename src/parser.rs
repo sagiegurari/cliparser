@@ -33,13 +33,10 @@ pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParse
     }
 
     let arguments_line = &command_line[args_start_index..];
-    if !parse_arguments(arguments_line, spec, &mut cli_parsed) {
-        return Err(ParserError::InvalidCommandLine(
-            "Arguments do not match spec".to_string(),
-        ));
+    match parse_arguments(arguments_line, spec, &mut cli_parsed) {
+        Ok(_) => Ok(cli_parsed),
+        Err(error) => Err(error),
     }
-
-    Ok(cli_parsed)
 }
 
 fn parse_command(command_line: &Vec<&str>, spec: &CliSpec) -> (bool, usize) {
@@ -86,14 +83,20 @@ fn parse_command(command_line: &Vec<&str>, spec: &CliSpec) -> (bool, usize) {
     }
 }
 
-fn parse_arguments(arguments_line: &[&str], spec: &CliSpec, _cli_parsed: &mut CliParsed) -> bool {
+fn parse_arguments(
+    arguments_line: &[&str],
+    spec: &CliSpec,
+    _cli_parsed: &mut CliParsed,
+) -> Result<(), ParserError> {
     if arguments_line.is_empty() {
-        return true;
+        return Ok(());
     }
 
     if spec.arguments.is_empty() && spec.positional_argument_name.is_none() {
         // we have arguments on the command line but we do not support arguments at all
-        return false;
+        return Err(ParserError::InvalidCommandLine(
+            "Positional arguments found but not allowed per spec".to_string(),
+        ));
     }
 
     let mut argument_spec_in_scope = None;
@@ -116,6 +119,10 @@ fn parse_arguments(arguments_line: &[&str], spec: &CliSpec, _cli_parsed: &mut Cl
                         }
                     }
 
+                    match argument_spec_in_scope {
+                        Some(_argument_spec) => (),
+                        None => (),
+                    }
                     // TODO IMPL
 
                     ()
@@ -123,8 +130,8 @@ fn parse_arguments(arguments_line: &[&str], spec: &CliSpec, _cli_parsed: &mut Cl
             }
         }
     }
-    // TODO IML THIS
-    true
+
+    Ok(())
 }
 
 fn validate_input(command_line: &Vec<&str>, spec: &CliSpec) -> Result<(), ParserError> {

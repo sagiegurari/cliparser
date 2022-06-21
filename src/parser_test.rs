@@ -152,9 +152,9 @@ fn parse_arguments_empty_arguments_line() {
         default_value: None,
     });
     let mut cli_parsed = CliParsed::new();
-    let valid = parse_arguments(&vec![], &cli_spec, &mut cli_parsed);
+    let result = parse_arguments(&vec![], &cli_spec, &mut cli_parsed);
 
-    assert!(valid);
+    assert!(result.is_ok());
     assert!(cli_parsed.arguments.is_empty());
     assert!(cli_parsed.argument_values.is_empty());
 }
@@ -163,9 +163,9 @@ fn parse_arguments_empty_arguments_line() {
 fn parse_arguments_non_empty_arguments_line_but_not_args_in_spec() {
     let cli_spec = CliSpec::new();
     let mut cli_parsed = CliParsed::new();
-    let valid = parse_arguments(&vec!["test"], &cli_spec, &mut cli_parsed);
+    let result = parse_arguments(&vec!["test"], &cli_spec, &mut cli_parsed);
 
-    assert!(!valid);
+    assert!(result.is_err());
 }
 
 #[test]
