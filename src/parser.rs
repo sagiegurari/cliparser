@@ -27,15 +27,19 @@ pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParse
         ));
     }
 
-    let cli_parsed = CliParsed::new();
+    let mut cli_parsed = CliParsed::new();
     if args_start_index >= command_line.len() {
         return Ok(cli_parsed);
     }
 
-    // TODO IMPL THIS
-    Err(ParserError::InvalidCommandLine(
-        "not implemented.....".to_string(),
-    ))
+    let arguments_line = &command_line[args_start_index..];
+    if !parse_arguments(arguments_line, spec, &mut cli_parsed) {
+        return Err(ParserError::InvalidCommandLine(
+            "Arguments do not match spec".to_string(),
+        ));
+    }
+
+    Ok(cli_parsed)
 }
 
 fn parse_command(command_line: &Vec<&str>, spec: &CliSpec) -> (bool, usize) {
@@ -80,6 +84,21 @@ fn parse_command(command_line: &Vec<&str>, spec: &CliSpec) -> (bool, usize) {
         }
         None => (false, 0),
     }
+}
+
+fn parse_arguments(arguments_line: &[&str], spec: &CliSpec, _cli_parsed: &mut CliParsed) -> bool {
+    if arguments_line.is_empty() {
+        return true;
+    }
+
+    if spec.arguments.is_empty() {
+        // we have arguments on the command line but we do not support arguments at all
+        return false;
+    }
+
+    let argument_in_scope: Option<&Argument> = None;
+    // TODO IML THIS
+    false
 }
 
 fn validate_input(command_line: &Vec<&str>, spec: &CliSpec) -> Result<(), ParserError> {

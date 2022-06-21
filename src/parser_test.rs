@@ -142,6 +142,33 @@ fn parse_command_no_match_subcommand_command_line_too_short() {
 }
 
 #[test]
+fn parse_arguments_empty_arguments_line() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "test".to_string(),
+        key: vec!["test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::None,
+        default_value: None,
+    });
+    let mut cli_parsed = CliParsed::new();
+    let valid = parse_arguments(&vec![], &cli_spec, &mut cli_parsed);
+
+    assert!(valid);
+    assert!(cli_parsed.arguments.is_empty());
+    assert!(cli_parsed.argument_values.is_empty());
+}
+
+#[test]
+fn parse_arguments_non_empty_arguments_line_but_not_args_in_spec() {
+    let cli_spec = CliSpec::new();
+    let mut cli_parsed = CliParsed::new();
+    let valid = parse_arguments(&vec!["test"], &cli_spec, &mut cli_parsed);
+
+    assert!(!valid);
+}
+
+#[test]
 fn validate_input_all_empty() {
     let cli_spec = CliSpec::new();
     let result = validate_input(&vec![], &cli_spec);
