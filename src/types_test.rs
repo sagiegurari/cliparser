@@ -19,6 +19,12 @@ fn display_command_does_not_match_spec() {
 }
 
 #[test]
+fn display_internal_error() {
+    let error = ParserError::InternalError("test".to_string());
+    assert!(error.to_string().contains("test"));
+}
+
+#[test]
 fn clispec_new() {
     let cli_spec = CliSpec::new();
 

@@ -7,7 +7,7 @@
 #[path = "./types_test.rs"]
 mod types_test;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fmt;
 use std::fmt::Display;
@@ -21,6 +21,8 @@ pub enum ParserError {
     InvalidCliSpec(String),
     /// Error Info Type
     CommandDoesNotMatchSpec(String),
+    /// Error Info Type
+    InternalError(String),
 }
 
 impl Display for ParserError {
@@ -29,6 +31,7 @@ impl Display for ParserError {
             Self::InvalidCommandLine(ref message) => write!(formatter, "{}", message),
             Self::InvalidCliSpec(ref message) => write!(formatter, "{}", message),
             Self::CommandDoesNotMatchSpec(ref message) => write!(formatter, "{}", message),
+            Self::InternalError(ref message) => write!(formatter, "{}", message),
         }
     }
 }
@@ -39,6 +42,7 @@ impl Error for ParserError {
             Self::InvalidCommandLine(_) => None,
             Self::InvalidCliSpec(_) => None,
             Self::CommandDoesNotMatchSpec(_) => None,
+            Self::InternalError(_) => None,
         }
     }
 }
@@ -113,7 +117,7 @@ impl CliSpec {
 pub struct CliParsed {
     /// A list of all arguments found (list of names not keys).
     /// Arguments that were not found by defaulted to a given value will not be listed here.
-    pub arguments: Vec<String>,
+    pub arguments: HashSet<String>,
     /// A map of all values for arguments found.
     /// The map will exclude arguments that do not accept value but include arguments not provided
     /// on the command line but were defaulted to a given value.

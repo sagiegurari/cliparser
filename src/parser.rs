@@ -7,7 +7,9 @@
 #[path = "./parser_test.rs"]
 mod parser_test;
 
-use crate::types::{CliParsed, CliSpec, Command, ParserError};
+use crate::types::{
+    Argument, ArgumentOccurrence, ArgumentValueType, CliParsed, CliSpec, Command, ParserError,
+};
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -34,7 +36,19 @@ pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParse
 
     let arguments_line = &command_line[args_start_index..];
     match parse_arguments(arguments_line, spec, &mut cli_parsed) {
-        Ok(_) => Ok(cli_parsed),
+        Ok(_) => {
+            for argument_spec in &spec.arguments {
+                if !cli_parsed.arguments.contains(&argument_spec.name) {
+                    if let Some(ref default_value) = argument_spec.default_value {
+                        cli_parsed
+                            .argument_values
+                            .insert(argument_spec.name.clone(), vec![default_value.to_string()]);
+                    }
+                }
+            }
+
+            Ok(cli_parsed)
+        }
         Err(error) => Err(error),
     }
 }
@@ -86,7 +100,7 @@ fn parse_command(command_line: &Vec<&str>, spec: &CliSpec) -> (bool, usize) {
 fn parse_arguments(
     arguments_line: &[&str],
     spec: &CliSpec,
-    _cli_parsed: &mut CliParsed,
+    cli_parsed: &mut CliParsed,
 ) -> Result<(), ParserError> {
     if arguments_line.is_empty() {
         return Ok(());
@@ -99,34 +113,111 @@ fn parse_arguments(
         ));
     }
 
-    let mut argument_spec_in_scope = None;
+    let mut argument_spec_in_scope: Option<Argument> = None;
     let started_positional = false;
-    let mut values = vec![];
     for argument_raw in arguments_line {
         if started_positional {
-            values.push(argument_raw.to_string());
+            insert_argument_value(
+                cli_parsed,
+                &spec.positional_argument_name.clone().unwrap(),
+                &argument_raw,
+            );
         } else {
+            // we found an argument key of single value type in previous index, now we get its value
+            if let Some(ref argument_spec) = argument_spec_in_scope {
+                if argument_spec.value_type == ArgumentValueType::Single {
+                    insert_argument_value(cli_parsed, &argument_spec.name, &argument_raw);
+
+                    argument_spec_in_scope = None;
+                    continue;
+                }
+            }
+
+            // search for argument in arguments spec
+            let mut argument_spec_found = None;
+            for argument_spec in &spec.arguments {
+                for key in &argument_spec.key {
+                    if key == argument_raw {
+                        argument_spec_found = Some(argument_spec);
+                        break;
+                    }
+                }
+            }
+
             match argument_spec_in_scope {
-                Some(_argument_spec) => (),
-                None => {
-                    // search for argument in arguments spec
-                    for argument_spec in &spec.arguments {
-                        for key in &argument_spec.key {
-                            if key == argument_raw {
-                                argument_spec_in_scope = Some(argument_spec);
-                                break;
+                Some(ref current_argument_spec) => match argument_spec_found {
+                    Some(found_argument_spec) => {
+                        if cli_parsed.arguments.contains(&found_argument_spec.name)
+                            && found_argument_spec.argument_occurrence
+                                != ArgumentOccurrence::Multiple
+                        {
+                            return Err(ParserError::InvalidCommandLine(
+                                format!("Duplicate argument {} found", &found_argument_spec.name)
+                                    .to_string(),
+                            ));
+                        }
+
+                        cli_parsed
+                            .arguments
+                            .insert(found_argument_spec.name.clone());
+
+                        match found_argument_spec.value_type {
+                            ArgumentValueType::Single | ArgumentValueType::Multiple => {
+                                argument_spec_in_scope = Some(found_argument_spec.clone());
                             }
+                            ArgumentValueType::None => (),
                         }
                     }
-
-                    match argument_spec_in_scope {
-                        Some(_argument_spec) => (),
-                        None => (),
+                    None => {
+                        // current value is not a new argument key and we are currently in multi value key so
+                        // lets add it as an additional value
+                        if current_argument_spec.value_type == ArgumentValueType::Multiple {
+                            insert_argument_value(
+                                cli_parsed,
+                                &current_argument_spec.name,
+                                &argument_raw,
+                            );
+                        } else {
+                            return Err(ParserError::InternalError(
+                                "Non multiple argument found in scope".to_string(),
+                            ));
+                        }
                     }
-                    // TODO IMPL
+                },
+                None => match argument_spec_found {
+                    Some(found_argument_spec) => {
+                        if cli_parsed.arguments.contains(&found_argument_spec.name)
+                            && found_argument_spec.argument_occurrence
+                                != ArgumentOccurrence::Multiple
+                        {
+                            return Err(ParserError::InvalidCommandLine(
+                                format!("Duplicate argument {} found", &found_argument_spec.name)
+                                    .to_string(),
+                            ));
+                        }
 
-                    ()
-                }
+                        cli_parsed
+                            .arguments
+                            .insert(found_argument_spec.name.clone());
+
+                        match found_argument_spec.value_type {
+                            ArgumentValueType::Single | ArgumentValueType::Multiple => {
+                                argument_spec_in_scope = Some(found_argument_spec.clone());
+                            }
+                            ArgumentValueType::None => (),
+                        }
+                    }
+                    None => match spec.positional_argument_name {
+                        // current value is not a new argument key and we are not in a scope of some argument
+                        // so it must be a positional argument
+                        Some(ref name) => insert_argument_value(cli_parsed, name, &argument_raw),
+                        None => {
+                            return Err(ParserError::InvalidCommandLine(
+                                "Positional arguments found but not allowed per spec".to_string(),
+                            ));
+                        }
+                    },
+                },
             }
         }
     }
@@ -184,4 +275,20 @@ fn validate_input(command_line: &Vec<&str>, spec: &CliSpec) -> Result<(), Parser
     }
 
     Ok(())
+}
+
+fn insert_argument_value(cli_parsed: &mut CliParsed, name: &str, value: &str) {
+    cli_parsed.arguments.insert(name.to_string());
+
+    match cli_parsed.argument_values.remove(name) {
+        Some(mut values) => {
+            values.push(value.to_string());
+            cli_parsed.argument_values.insert(name.to_string(), values);
+        }
+        None => {
+            cli_parsed
+                .argument_values
+                .insert(name.to_string(), vec![value.to_string()]);
+        }
+    }
 }
