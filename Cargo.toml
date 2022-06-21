@@ -1,0 +1,27 @@
+[package]
+name = "cliparser"
+version = "0.1.0"
+authors = ["Sagie Gur-Ari <sagiegurari@gmail.com>"]
+description = "Simple command line parser."
+license = "Apache-2.0"
+edition = "2021"
+documentation = "https://sagiegurari.github.io/cliparser/api/cliparser/index.html"
+homepage = "http://github.com/sagiegurari/cliparser"
+repository = "https://github.com/sagiegurari/cliparser.git"
+readme = "README.md"
+keywords = ["os", "cli", "command", "parser", "params"]
+categories = ["command-line-interface"]
+include = [
+  "/benches/*",
+  "/docs/*",
+  "/examples/*",
+  "/src/*",
+  "/tests/*",
+  "/Cargo.toml",
+  "/LICENSE",
+  "/README.md",
+  "/Makefile.toml",
+]
+
+[dev-dependencies]
+doc-comment = "^0.3"
