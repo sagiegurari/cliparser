@@ -37,14 +37,14 @@ pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParse
     let arguments_line = &command_line[args_start_index..];
     match parse_arguments(arguments_line, spec, &mut cli_parsed) {
         Ok(_) => {
-            insert_default__values(spec, &mut cli_parsed);
+            insert_default_values(spec, &mut cli_parsed);
             Ok(cli_parsed)
         }
         Err(error) => Err(error),
     }
 }
 
-fn insert_default__values(spec: &CliSpec, cli_parsed: &mut CliParsed) {
+fn insert_default_values(spec: &CliSpec, cli_parsed: &mut CliParsed) {
     for argument_spec in &spec.arguments {
         if !cli_parsed.arguments.contains(&argument_spec.name) {
             if let Some(ref default_value) = argument_spec.default_value {
