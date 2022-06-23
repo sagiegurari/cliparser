@@ -182,7 +182,7 @@ fn parse_arguments_empty_arguments_line() {
 }
 
 #[test]
-fn parse_arguments_non_empty_arguments_line_but_not_args_in_spec() {
+fn parse_arguments_non_empty_arguments_line_but_no_args_in_spec() {
     let cli_spec = CliSpec::new();
     let mut cli_parsed = CliParsed::new();
     let result = parse_arguments(&vec!["test"], &cli_spec, &mut cli_parsed);
@@ -196,6 +196,26 @@ fn parse_arguments_positional_only() {
     cli_spec.positional_argument_name = Some("args".to_string());
     let mut cli_parsed = CliParsed::new();
     let result = parse_arguments(&vec!["1", "2", "3"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("args".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert(
+        "args".to_string(),
+        vec!["1".to_string(), "2".to_string(), "3".to_string()],
+    );
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
+fn parse_arguments_positional_only_with_separator() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.positional_argument_name = Some("args".to_string());
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["--", "1", "2", "3"], &cli_spec, &mut cli_parsed);
 
     assert!(result.is_ok());
 
@@ -233,6 +253,23 @@ fn parse_arguments_non_value_param_only() {
 }
 
 #[test]
+fn parse_arguments_non_value_param_only_with_unsupported_value() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::None,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["--test", "value"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_err());
+}
+
+#[test]
 fn parse_arguments_single_value_param_only() {
     let mut cli_spec = CliSpec::new();
     cli_spec.arguments.push(Argument {
@@ -254,6 +291,23 @@ fn parse_arguments_single_value_param_only() {
     argument_values.insert("testarg".to_string(), vec!["value".to_string()]);
     assert_eq!(cli_parsed.arguments, argument_names);
     assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
+fn parse_arguments_single_value_param_only_with_multiple_values() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["--test", "1", "2"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_err());
 }
 
 #[test]
@@ -284,6 +338,49 @@ fn parse_arguments_multi_value_param_only() {
 }
 
 #[test]
+fn parse_arguments_multi_value_param_only_no_values() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Multiple,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["--test"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("testarg".to_string());
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, HashMap::new());
+}
+
+#[test]
+fn parse_arguments_single_occurrence_multiple_times_on_cli() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(
+        &vec!["--test", "1", "--test", "2"],
+        &cli_spec,
+        &mut cli_parsed,
+    );
+
+    assert!(result.is_err());
+}
+
+#[test]
 fn parse_arguments_multi_occurence_param_only() {
     let mut cli_spec = CliSpec::new();
     cli_spec.arguments.push(Argument {
@@ -309,6 +406,128 @@ fn parse_arguments_multi_occurence_param_only() {
     argument_values.insert(
         "testarg".to_string(),
         vec!["1".to_string(), "2".to_string(), "3".to_string()],
+    );
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
+fn parse_arguments_single_value_param_inside_positional() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let mut result = parse_arguments(
+        &vec!["something", "--test", "value"],
+        &cli_spec,
+        &mut cli_parsed,
+    );
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("args".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert(
+        "args".to_string(),
+        vec![
+            "something".to_string(),
+            "--test".to_string(),
+            "value".to_string(),
+        ],
+    );
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+
+    cli_parsed = CliParsed::new();
+    result = parse_arguments(&vec!["--", "--test", "value"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_ok());
+
+    argument_names = HashSet::new();
+    argument_names.insert("args".to_string());
+    argument_values = HashMap::new();
+    argument_values.insert(
+        "args".to_string(),
+        vec!["--test".to_string(), "value".to_string()],
+    );
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
+fn parse_arguments_combination() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.arguments.push(Argument {
+        name: "flag".to_string(),
+        key: vec!["--flag".to_string(), "-f".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::None,
+        default_value: None,
+    });
+    cli_spec.arguments.push(Argument {
+        name: "single".to_string(),
+        key: vec!["--s1".to_string(), "-s".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: None,
+    });
+    cli_spec.arguments.push(Argument {
+        name: "mo".to_string(),
+        key: vec!["--mo1".to_string(), "-mo2".to_string()],
+        argument_occurrence: ArgumentOccurrence::Multiple,
+        value_type: ArgumentValueType::Single,
+        default_value: None,
+    });
+    cli_spec.arguments.push(Argument {
+        name: "mv".to_string(),
+        key: vec!["--mv1".to_string(), "-mv2".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Multiple,
+        default_value: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(
+        &vec![
+            "-mv2", "4", "5", "6", "--mo1", "1", "-mo2", "2", "-f", "-s", "3", "arg1", "arg2",
+            "-mo2", "arg5",
+        ],
+        &cli_spec,
+        &mut cli_parsed,
+    );
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("flag".to_string());
+    argument_names.insert("single".to_string());
+    argument_names.insert("mo".to_string());
+    argument_names.insert("mv".to_string());
+    argument_names.insert("args".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert("single".to_string(), vec!["3".to_string()]);
+    argument_values.insert("mo".to_string(), vec!["1".to_string(), "2".to_string()]);
+    argument_values.insert(
+        "mv".to_string(),
+        vec!["4".to_string(), "5".to_string(), "6".to_string()],
+    );
+    argument_values.insert(
+        "args".to_string(),
+        vec![
+            "arg1".to_string(),
+            "arg2".to_string(),
+            "-mo2".to_string(),
+            "arg5".to_string(),
+        ],
     );
     assert_eq!(cli_parsed.arguments, argument_names);
     assert_eq!(cli_parsed.argument_values, argument_values);

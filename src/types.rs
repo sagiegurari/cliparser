@@ -63,7 +63,9 @@ pub enum Command {
 pub enum ArgumentOccurrence {
     /// The argument can appear only once
     Single,
-    /// The argument can appear multiple times
+    /// The argument can appear multiple times. The value of each occurrence will be
+    /// picked up so even args with single value constraint can have multiple values if
+    /// they support multiple occurrences.
     Multiple,
 }
 

@@ -30,7 +30,7 @@ pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParse
     }
 
     let mut cli_parsed = CliParsed::new();
-    if args_start_index >= command_line.len() {
+    if args_start_index > command_line.len() {
         return Ok(cli_parsed);
     }
 
@@ -114,7 +114,7 @@ fn parse_arguments(
     }
 
     let mut argument_spec_in_scope: Option<Argument> = None;
-    let started_positional = false;
+    let mut started_positional = false;
     for argument_raw in arguments_line {
         if started_positional {
             insert_argument_value(
@@ -131,6 +131,12 @@ fn parse_arguments(
                     argument_spec_in_scope = None;
                     continue;
                 }
+            }
+
+            // The -- is a special case that defines start of positional arguments
+            if *argument_raw == "--" {
+                started_positional = true;
+                continue;
             }
 
             // search for argument in arguments spec
@@ -210,7 +216,10 @@ fn parse_arguments(
                     None => match spec.positional_argument_name {
                         // current value is not a new argument key and we are not in a scope of some argument
                         // so it must be a positional argument
-                        Some(ref name) => insert_argument_value(cli_parsed, name, &argument_raw),
+                        Some(ref name) => {
+                            started_positional = true;
+                            insert_argument_value(cli_parsed, name, &argument_raw)
+                        }
                         None => {
                             return Err(ParserError::InvalidCommandLine(
                                 "Positional arguments found but not allowed per spec".to_string(),
