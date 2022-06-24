@@ -10,12 +10,12 @@ mod parser_test;
 use crate::types::{
     Argument, ArgumentOccurrence, ArgumentValueType, CliParsed, CliSpec, Command, ParserError,
 };
+use std::env;
 use std::ffi::OsStr;
 use std::path::Path;
 
 /// Parsers the given command line based on the given spec and returns the result.<br>
-/// In case of error (such as invalid input), an error will be returned.<br>
-/// In case the command line does not match the spec, Ok(None) will be returned.
+/// In case of invalid input or the provided spec does not match the command line, an error will be returned.
 pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParsed, ParserError> {
     if let Err(error) = validate_input(command_line, spec) {
         return Err(error);
@@ -44,13 +44,72 @@ pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParse
     }
 }
 
+/// Parsers the current process command line based on the given spec and returns the result.<br>
+/// In case of invalid input or the provided spec does not match the command line, an error will be returned.
+pub(crate) fn parse_process(spec: &CliSpec) -> Result<CliParsed, ParserError> {
+    let command_line_strings = get_process_command_line();
+    let command_line = command_line_strings
+        .iter()
+        .map(|value| value.as_str())
+        .collect();
+    parse(&command_line, spec)
+}
+
+/// Parsers the given command line based on the given specs and returns the result.<br>
+/// In case of invalid input or none of the provided specs do not match the command line, an error will be returned.
+pub(crate) fn parse_any(
+    command_line: &Vec<&str>,
+    specs: Vec<&CliSpec>,
+) -> Result<(usize, CliParsed), ParserError> {
+    let mut index = 0;
+    for spec in specs {
+        let result = parse(command_line, spec);
+        if let Ok(cli_parsed) = result {
+            return Ok((index, cli_parsed));
+        }
+
+        index = index + 1;
+    }
+
+    Err(ParserError::InvalidCommandLine(
+        "Command does not match any spec".to_string(),
+    ))
+}
+
+/// Parsers the current process command line based on the given specs and returns the result.<br>
+/// In case of invalid input or none of the provided specs do not match the command line, an error will be returned.
+pub(crate) fn parse_process_any(specs: Vec<&CliSpec>) -> Result<(usize, CliParsed), ParserError> {
+    let command_line_strings = get_process_command_line();
+    let command_line = command_line_strings
+        .iter()
+        .map(|value| value.as_str())
+        .collect();
+    parse_any(&command_line, specs)
+}
+
+#[cfg(not(test))]
+fn get_process_command_line() -> Vec<String> {
+    env::args().collect()
+}
+
+#[cfg(test)]
+fn get_process_command_line() -> Vec<String> {
+    env::var("TEST_CLI_PARSER_COMMAND_LINE")
+        .unwrap_or("".to_string())
+        .split(" ")
+        .map(|value| value.to_string())
+        .collect()
+}
+
 fn insert_default_values(spec: &CliSpec, cli_parsed: &mut CliParsed) {
     for argument_spec in &spec.arguments {
         if !cli_parsed.arguments.contains(&argument_spec.name) {
-            if let Some(ref default_value) = argument_spec.default_value {
-                cli_parsed
-                    .argument_values
-                    .insert(argument_spec.name.clone(), vec![default_value.to_string()]);
+            if argument_spec.value_type != ArgumentValueType::None {
+                if let Some(ref default_value) = argument_spec.default_value {
+                    cli_parsed
+                        .argument_values
+                        .insert(argument_spec.name.clone(), vec![default_value.to_string()]);
+                }
             }
         }
     }

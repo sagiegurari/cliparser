@@ -2,6 +2,7 @@
 [config]
 additional_profiles = [
   "all-default-tasks",
+  "multi-phase-tests",
   "docs-all-modification-tasks",
   "ci-coverage-tasks",
   "ci-all-build-tasks",

@@ -93,6 +93,19 @@ pub struct Argument {
     pub value_type: ArgumentValueType,
     /// Default value if not found
     pub default_value: Option<String>,
+    /// Help text
+    pub help: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+/// Holds the command line spec meta information used to generate version and help messages
+pub struct CliSpecMetaInfo {
+    /// Author name
+    pub author: Option<String>,
+    /// Version string
+    pub version: Option<String>,
+    /// Description string
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -105,6 +118,8 @@ pub struct CliSpec {
     /// The name of the argument that will hold all arguments after the last known key based
     /// argument. If not defined, such positional arguments are not allowed.
     pub positional_argument_name: Option<String>,
+    /// Meta information used for generating version and help messages
+    pub meta_info: Option<CliSpecMetaInfo>,
 }
 
 impl CliSpec {
@@ -117,7 +132,7 @@ impl CliSpec {
 #[derive(Debug, Clone, PartialEq, Default)]
 /// Holds the command line parse result
 pub struct CliParsed {
-    /// A list of all arguments found (list of names not keys).
+    /// A collection of all arguments found (list of names not keys).
     /// Arguments that were not found by defaulted to a given value will not be listed here.
     pub arguments: HashSet<String>,
     /// A map of all values for arguments found.
