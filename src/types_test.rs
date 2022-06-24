@@ -25,12 +25,23 @@ fn display_internal_error() {
 }
 
 #[test]
+fn clispecmetainfo_new() {
+    let meta_info = CliSpecMetaInfo::new();
+
+    assert!(meta_info.author.is_none());
+    assert!(meta_info.version.is_none());
+    assert!(meta_info.description.is_none());
+    assert!(meta_info.project.is_none());
+}
+
+#[test]
 fn clispec_new() {
     let cli_spec = CliSpec::new();
 
     assert!(cli_spec.command.is_empty());
     assert!(cli_spec.arguments.is_empty());
     assert!(cli_spec.positional_argument_name.is_none());
+    assert!(cli_spec.meta_info.is_none());
 }
 
 #[test]

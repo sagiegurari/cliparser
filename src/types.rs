@@ -81,6 +81,15 @@ pub enum ArgumentValueType {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+/// The argument help text
+pub enum ArgumentHelp {
+    /// Text value
+    Text(String),
+    /// Text and variable name
+    TextAndParam(String, String),
+}
+
+#[derive(Debug, Clone, PartialEq)]
 /// Holds the command line argument spec
 pub struct Argument {
     /// Unique name for the argument later used to pull the parsed information
@@ -94,7 +103,7 @@ pub struct Argument {
     /// Default value if not found
     pub default_value: Option<String>,
     /// Help text
-    pub help: Option<String>,
+    pub help: Option<ArgumentHelp>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -106,6 +115,15 @@ pub struct CliSpecMetaInfo {
     pub version: Option<String>,
     /// Description string
     pub description: Option<String>,
+    /// Project name
+    pub project: Option<String>,
+}
+
+impl CliSpecMetaInfo {
+    /// Returns new instance
+    pub fn new() -> CliSpecMetaInfo {
+        Default::default()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]

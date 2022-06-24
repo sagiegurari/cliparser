@@ -1,6 +1,6 @@
-//! # cliparser
+//! # parser
 //!
-//! Loads rust compiler information.
+//! Parsers arguments line based on given spec and returned parsed data.
 //!
 
 #[cfg(test)]

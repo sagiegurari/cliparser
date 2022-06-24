@@ -143,6 +143,28 @@
 <span id="136">136</span>
 <span id="137">137</span>
 <span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # types</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Defines the various types.</span>
@@ -226,6 +248,15 @@
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="doccomment">/// The argument help text</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ArgumentHelp</span> {
+    <span class="doccomment">/// Text value</span>
+    <span class="ident">Text</span>(<span class="ident">String</span>),
+    <span class="doccomment">/// Text and variable name</span>
+    <span class="ident">TextAndParam</span>(<span class="ident">String</span>, <span class="ident">String</span>),
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="doccomment">/// Holds the command line argument spec</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Argument</span> {
     <span class="doccomment">/// Unique name for the argument later used to pull the parsed information</span>
@@ -239,7 +270,18 @@
     <span class="doccomment">/// Default value if not found</span>
     <span class="kw">pub</span> <span class="ident">default_value</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Help text</span>
-    <span class="kw">pub</span> <span class="ident">help</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">help</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ArgumentHelp</span><span class="op">&gt;</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Default</span>)]</span>
+<span class="doccomment">/// Holds the command line spec meta information used to generate version and help messages</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CliSpecMetaInfo</span> {
+    <span class="doccomment">/// Author name</span>
+    <span class="kw">pub</span> <span class="ident">author</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Version string</span>
+    <span class="kw">pub</span> <span class="ident">version</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Description string</span>
+    <span class="kw">pub</span> <span class="ident">description</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Default</span>)]</span>
@@ -252,6 +294,8 @@
     <span class="doccomment">/// The name of the argument that will hold all arguments after the last known key based</span>
     <span class="doccomment">/// argument. If not defined, such positional arguments are not allowed.</span>
     <span class="kw">pub</span> <span class="ident">positional_argument_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Meta information used for generating version and help messages</span>
+    <span class="kw">pub</span> <span class="ident">meta_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CliSpecMetaInfo</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">CliSpec</span> {

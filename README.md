@@ -26,7 +26,9 @@ Simply include the library and invoke the get function to pull all info as follo
 <!--{ "examples/example.rs" | lines: 1 | code: rust }-->
 ```rust
 use cliparser::parse;
-use cliparser::types::{Argument, ArgumentOccurrence, ArgumentValueType, CliSpec, Command};
+use cliparser::types::{
+    Argument, ArgumentHelp, ArgumentOccurrence, ArgumentValueType, CliSpec, Command,
+};
 use std::collections::{HashMap, HashSet};
 
 fn main() {
@@ -61,7 +63,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::None,
         default_value: None,
-        help: Some("A flag without value example".to_string()),
+        help: Some(ArgumentHelp::Text(
+            "A flag without value example".to_string(),
+        )),
     });
 
     // Add an argument that accepts a single value, for example -s value
@@ -71,7 +75,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::Single,
         default_value: None,
-        help: Some("A parameter with single value example".to_string()),
+        help: Some(ArgumentHelp::Text(
+            "A parameter with single value example".to_string(),
+        )),
     });
 
     // Add an argument that accepts multiple values
@@ -81,7 +87,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Multiple,
         value_type: ArgumentValueType::Single,
         default_value: None,
-        help: Some("A parameter with multiple values example".to_string()),
+        help: Some(ArgumentHelp::Text(
+            "A parameter with multiple values example".to_string(),
+        )),
     });
 
     // Add an argument that can appear multiple times.
@@ -93,9 +101,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::Multiple,
         default_value: None,
-        help: Some(
+        help: Some(ArgumentHelp::Text(
             "A parameter with single value but can appear multiple times example".to_string(),
-        ),
+        )),
     });
 
     // We can define a 'default' value.
@@ -109,7 +117,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::Single,
         default_value: Some("some default".to_string()),
-        help: Some("A parameter with default value example".to_string()),
+        help: Some(ArgumentHelp::Text(
+            "A parameter with default value example".to_string(),
+        )),
     });
 
     // Parsers the given command line based on the given spec and returns the result.

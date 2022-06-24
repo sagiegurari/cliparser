@@ -1,9 +1,20 @@
-use cliparser::parse;
-use cliparser::types::{Argument, ArgumentOccurrence, ArgumentValueType, CliSpec, Command};
+use cliparser::types::{
+    Argument, ArgumentHelp, ArgumentOccurrence, ArgumentValueType, CliSpec, CliSpecMetaInfo,
+    Command,
+};
+use cliparser::{help, parse, version};
 use std::collections::{HashMap, HashSet};
 
 fn main() {
     let mut cli_spec = CliSpec::new();
+
+    // Add meta info to support help and version text generation
+    cli_spec.meta_info = Some(CliSpecMetaInfo {
+        author: Some("Sagie Gur-Ari".to_string()),
+        version: Some("1.2.3-beta".to_string()),
+        description: Some("Amazing example".to_string()),
+        project: Some("example".to_string()),
+    });
 
     // Define the prefix of the arguments.
     // It can be a command/s (path prefix ignored) and/or a sub command/s
@@ -34,7 +45,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::None,
         default_value: None,
-        help: Some("A flag without value example".to_string()),
+        help: Some(ArgumentHelp::Text(
+            "A flag without value example".to_string(),
+        )),
     });
 
     // Add an argument that accepts a single value, for example -s value
@@ -44,7 +57,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::Single,
         default_value: None,
-        help: Some("A parameter with single value example".to_string()),
+        help: Some(ArgumentHelp::Text(
+            "A parameter with single value example".to_string(),
+        )),
     });
 
     // Add an argument that accepts multiple values
@@ -54,7 +69,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Multiple,
         value_type: ArgumentValueType::Single,
         default_value: None,
-        help: Some("A parameter with multiple values example".to_string()),
+        help: Some(ArgumentHelp::Text(
+            "A parameter with multiple values example".to_string(),
+        )),
     });
 
     // Add an argument that can appear multiple times.
@@ -66,9 +83,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::Multiple,
         default_value: None,
-        help: Some(
+        help: Some(ArgumentHelp::Text(
             "A parameter with single value but can appear multiple times example".to_string(),
-        ),
+        )),
     });
 
     // We can define a 'default' value.
@@ -82,7 +99,9 @@ fn main() {
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::Single,
         default_value: Some("some default".to_string()),
-        help: Some("A parameter with default value example".to_string()),
+        help: Some(ArgumentHelp::Text(
+            "A parameter with default value example".to_string(),
+        )),
     });
 
     // Parsers the given command line based on the given spec and returns the result.
@@ -135,4 +154,12 @@ fn main() {
     argument_values.insert("default".to_string(), vec!["some default".to_string()]);
     assert_eq!(cli_parsed.arguments, argument_names);
     assert_eq!(cli_parsed.argument_values, argument_values);
+
+    // generate help text
+    let help_text = help(&cli_spec);
+    println!("{}", help_text);
+
+    // generate version text
+    let version_text = version(&cli_spec);
+    println!("{}", version_text);
 }
