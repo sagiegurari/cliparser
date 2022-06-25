@@ -1,6 +1,6 @@
 use cliparser::types::{
     Argument, ArgumentHelp, ArgumentOccurrence, ArgumentValueType, CliSpec, CliSpecMetaInfo,
-    Command,
+    Command, PositionalArgument,
 };
 use cliparser::{help, parse, version};
 use std::collections::{HashMap, HashSet};
@@ -33,7 +33,13 @@ fn main() {
     // If the positional is None, positional arguments are not allowed.
     // Add -- to the command line forces positional arguments and stops key
     // based argument parsing.
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: Some(ArgumentHelp::TextAndParam(
+            "The command line arguments".to_string(),
+            "ARGS".to_string(),
+        )),
+    });
 
     // Add a 'flag' only argument which is an argument that does not accept any value.
     // You can define multiple variations of the parameter name.

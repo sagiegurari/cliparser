@@ -106,6 +106,15 @@ pub struct Argument {
     pub help: Option<ArgumentHelp>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+/// Holds the positional argument spec
+pub struct PositionalArgument {
+    /// Unique name for the argument later used to pull the parsed information
+    pub name: String,
+    /// Help text
+    pub help: Option<ArgumentHelp>,
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 /// Holds the command line spec meta information used to generate version and help messages
 pub struct CliSpecMetaInfo {
@@ -135,7 +144,7 @@ pub struct CliSpec {
     pub arguments: Vec<Argument>,
     /// The name of the argument that will hold all arguments after the last known key based
     /// argument. If not defined, such positional arguments are not allowed.
-    pub positional_argument_name: Option<String>,
+    pub positional_argument: Option<PositionalArgument>,
     /// Meta information used for generating version and help messages
     pub meta_info: Option<CliSpecMetaInfo>,
 }

@@ -1,5 +1,8 @@
 use cliparser::parse;
-use cliparser::types::{Argument, ArgumentOccurrence, ArgumentValueType, CliSpec, Command};
+use cliparser::types::{
+    Argument, ArgumentHelp, ArgumentOccurrence, ArgumentValueType, CliSpec, Command,
+    PositionalArgument,
+};
 use std::collections::{HashMap, HashSet};
 
 #[test]
@@ -14,7 +17,13 @@ fn parse_test() {
         "make".to_string(),
     ]));
 
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: Some(ArgumentHelp::TextAndParam(
+            "The command line arguments".to_string(),
+            "ARGS".to_string(),
+        )),
+    });
 
     cli_spec.arguments.push(Argument {
         name: "flag".to_string(),

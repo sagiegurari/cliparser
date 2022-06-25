@@ -165,6 +165,24 @@
 <span id="158">158</span>
 <span id="159">159</span>
 <span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # types</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Defines the various types.</span>
@@ -273,6 +291,15 @@
     <span class="kw">pub</span> <span class="ident">help</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ArgumentHelp</span><span class="op">&gt;</span>,
 }
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="doccomment">/// Holds the positional argument spec</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PositionalArgument</span> {
+    <span class="doccomment">/// Unique name for the argument later used to pull the parsed information</span>
+    <span class="kw">pub</span> <span class="ident">name</span>: <span class="ident">String</span>,
+    <span class="doccomment">/// Help text</span>
+    <span class="kw">pub</span> <span class="ident">help</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ArgumentHelp</span><span class="op">&gt;</span>,
+}
+
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Default</span>)]</span>
 <span class="doccomment">/// Holds the command line spec meta information used to generate version and help messages</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CliSpecMetaInfo</span> {
@@ -282,6 +309,15 @@
     <span class="kw">pub</span> <span class="ident">version</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Description string</span>
     <span class="kw">pub</span> <span class="ident">description</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Project name</span>
+    <span class="kw">pub</span> <span class="ident">project</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">CliSpecMetaInfo</span> {
+    <span class="doccomment">/// Returns new instance</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">CliSpecMetaInfo</span> {
+        <span class="ident">Default::default</span>()
+    }
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Default</span>)]</span>
@@ -293,7 +329,7 @@
     <span class="kw">pub</span> <span class="ident">arguments</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Argument</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The name of the argument that will hold all arguments after the last known key based</span>
     <span class="doccomment">/// argument. If not defined, such positional arguments are not allowed.</span>
-    <span class="kw">pub</span> <span class="ident">positional_argument_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">positional_argument</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PositionalArgument</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Meta information used for generating version and help messages</span>
     <span class="kw">pub</span> <span class="ident">meta_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CliSpecMetaInfo</span><span class="op">&gt;</span>,
 }

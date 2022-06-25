@@ -1,4 +1,5 @@
 use super::*;
+use crate::types::PositionalArgument;
 use std::collections::{HashMap, HashSet};
 
 #[test]
@@ -35,7 +36,10 @@ fn parse_default_value() {
 #[test]
 fn parse_combination() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     cli_spec.arguments.push(Argument {
         name: "flag".to_string(),
         key: vec!["--flag".to_string(), "-f".to_string()],
@@ -119,7 +123,10 @@ fn parse_combination() {
 #[ignore]
 fn parse_process_combination() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     cli_spec.arguments.push(Argument {
         name: "flag".to_string(),
         key: vec!["--flag".to_string(), "-f".to_string()],
@@ -376,7 +383,10 @@ fn insert_default_values_empty() {
 #[test]
 fn insert_default_values_all_types() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     cli_spec.arguments.push(Argument {
         name: "flag".to_string(),
         key: vec!["--flag".to_string(), "-f".to_string()],
@@ -560,7 +570,10 @@ fn parse_arguments_non_empty_arguments_line_but_no_args_in_spec() {
 #[test]
 fn parse_arguments_positional_only() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     let mut cli_parsed = CliParsed::new();
     let result = parse_arguments(&vec!["1", "2", "3"], &cli_spec, &mut cli_parsed);
 
@@ -580,7 +593,10 @@ fn parse_arguments_positional_only() {
 #[test]
 fn parse_arguments_positional_only_with_separator() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     let mut cli_parsed = CliParsed::new();
     let result = parse_arguments(&vec!["--", "1", "2", "3"], &cli_spec, &mut cli_parsed);
 
@@ -789,7 +805,10 @@ fn parse_arguments_multi_occurence_param_only() {
 #[test]
 fn parse_arguments_single_value_param_inside_positional() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     cli_spec.arguments.push(Argument {
         name: "testarg".to_string(),
         key: vec!["--test".to_string()],
@@ -841,7 +860,10 @@ fn parse_arguments_single_value_param_inside_positional() {
 #[test]
 fn parse_arguments_combination() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     cli_spec.arguments.push(Argument {
         name: "flag".to_string(),
         key: vec!["--flag".to_string(), "-f".to_string()],

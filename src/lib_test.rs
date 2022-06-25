@@ -1,5 +1,7 @@
 use super::*;
-use crate::types::{Argument, ArgumentOccurrence, ArgumentValueType, CliSpec, Command};
+use crate::types::{
+    Argument, ArgumentOccurrence, ArgumentValueType, CliSpec, Command, PositionalArgument,
+};
 use doc_comment as _;
 use std::collections::{HashMap, HashSet};
 use std::env;
@@ -7,7 +9,10 @@ use std::env;
 #[test]
 fn parse_combination() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     cli_spec.arguments.push(Argument {
         name: "flag".to_string(),
         key: vec!["--flag".to_string(), "-f".to_string()],
@@ -91,7 +96,10 @@ fn parse_combination() {
 #[ignore]
 fn parse_process_combination() {
     let mut cli_spec = CliSpec::new();
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: None,
+    });
     cli_spec.arguments.push(Argument {
         name: "flag".to_string(),
         key: vec!["--flag".to_string(), "-f".to_string()],

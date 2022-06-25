@@ -163,7 +163,7 @@
 //! ```
 //! use cliparser::types::{
 //!     Argument, ArgumentHelp, ArgumentOccurrence, ArgumentValueType, CliSpec, CliSpecMetaInfo,
-//!     Command,
+//!     Command, PositionalArgument,
 //! };
 //! use cliparser::{help, parse, version};
 //! use std::collections::{HashMap, HashSet};
@@ -196,7 +196,13 @@
 //!     // If the positional is None, positional arguments are not allowed.
 //!     // Add -- to the command line forces positional arguments and stops key
 //!     // based argument parsing.
-//!     cli_spec.positional_argument_name = Some("args".to_string());
+//!     cli_spec.positional_argument = Some(PositionalArgument {
+//!         name: "args".to_string(),
+//!         help: Some(ArgumentHelp::TextAndParam(
+//!             "The command line arguments".to_string(),
+//!             "ARGS".to_string(),
+//!         )),
+//!     });
 //!
 //!     // Add a 'flag' only argument which is an argument that does not accept any value.
 //!     // You can define multiple variations of the parameter name.
@@ -366,7 +372,7 @@ use crate::types::{CliParsed, CliSpec, ParserError};
 /// ```
 /// use cliparser::types::{
 ///     Argument, ArgumentHelp, ArgumentOccurrence, ArgumentValueType, CliSpec, CliSpecMetaInfo,
-///     Command,
+///     Command, PositionalArgument,
 /// };
 /// use cliparser::{help, parse, version};
 /// use std::collections::{HashMap, HashSet};
@@ -399,7 +405,13 @@ use crate::types::{CliParsed, CliSpec, ParserError};
 ///     // If the positional is None, positional arguments are not allowed.
 ///     // Add -- to the command line forces positional arguments and stops key
 ///     // based argument parsing.
-///     cli_spec.positional_argument_name = Some("args".to_string());
+///     cli_spec.positional_argument = Some(PositionalArgument {
+///         name: "args".to_string(),
+///         help: Some(ArgumentHelp::TextAndParam(
+///             "The command line arguments".to_string(),
+///             "ARGS".to_string(),
+///         )),
+///     });
 ///
 ///     // Add a 'flag' only argument which is an argument that does not accept any value.
 ///     // You can define multiple variations of the parameter name.
@@ -493,6 +505,7 @@ use crate::types::{CliParsed, CliSpec, ParserError};
 ///     // found for all occurrences.
 ///     assert!(result.is_ok());
 ///     let cli_parsed = result.unwrap();
+///     println!("Cli Parsed:\n{:?}", &cli_parsed);
 ///
 ///     let mut argument_names = HashSet::new();
 ///     argument_names.insert("flag".to_string());

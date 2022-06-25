@@ -25,14 +25,23 @@ Simply include the library and invoke the get function to pull all info as follo
 
 <!--{ "examples/example.rs" | lines: 1 | code: rust }-->
 ```rust
-use cliparser::parse;
 use cliparser::types::{
-    Argument, ArgumentHelp, ArgumentOccurrence, ArgumentValueType, CliSpec, Command,
+    Argument, ArgumentHelp, ArgumentOccurrence, ArgumentValueType, CliSpec, CliSpecMetaInfo,
+    Command, PositionalArgument,
 };
+use cliparser::{help, parse, version};
 use std::collections::{HashMap, HashSet};
 
 fn main() {
     let mut cli_spec = CliSpec::new();
+
+    // Add meta info to support help and version text generation
+    cli_spec.meta_info = Some(CliSpecMetaInfo {
+        author: Some("Sagie Gur-Ari".to_string()),
+        version: Some("1.2.3-beta".to_string()),
+        description: Some("Amazing example".to_string()),
+        project: Some("example".to_string()),
+    });
 
     // Define the prefix of the arguments.
     // It can be a command/s (path prefix ignored) and/or a sub command/s
@@ -51,7 +60,13 @@ fn main() {
     // If the positional is None, positional arguments are not allowed.
     // Add -- to the command line forces positional arguments and stops key
     // based argument parsing.
-    cli_spec.positional_argument_name = Some("args".to_string());
+    cli_spec.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: Some(ArgumentHelp::TextAndParam(
+            "The command line arguments".to_string(),
+            "ARGS".to_string(),
+        )),
+    });
 
     // Add a 'flag' only argument which is an argument that does not accept any value.
     // You can define multiple variations of the parameter name.
@@ -172,6 +187,14 @@ fn main() {
     argument_values.insert("default".to_string(), vec!["some default".to_string()]);
     assert_eq!(cli_parsed.arguments, argument_names);
     assert_eq!(cli_parsed.argument_values, argument_values);
+
+    // generate help text
+    let help_text = help(&cli_spec);
+    println!("{}", help_text);
+
+    // generate version text
+    let version_text = version(&cli_spec);
+    println!("{}", version_text);
 }
 ```
 <!--{ end }-->

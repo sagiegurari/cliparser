@@ -168,12 +168,17 @@ fn parse_arguments(
         return Ok(());
     }
 
-    if spec.arguments.is_empty() && spec.positional_argument_name.is_none() {
+    if spec.arguments.is_empty() && spec.positional_argument.is_none() {
         // we have arguments on the command line but we do not support arguments at all
         return Err(ParserError::InvalidCommandLine(
             "Positional arguments found but not allowed per spec".to_string(),
         ));
     }
+
+    let positional_argument_name = match &spec.positional_argument {
+        Some(positional_argument_spec) => Some(positional_argument_spec.name.clone()),
+        None => None,
+    };
 
     let mut argument_spec_in_scope: Option<Argument> = None;
     let mut started_positional = false;
@@ -181,7 +186,7 @@ fn parse_arguments(
         if started_positional {
             insert_argument_value(
                 cli_parsed,
-                &spec.positional_argument_name.clone().unwrap(),
+                &positional_argument_name.clone().unwrap(),
                 &argument_raw,
             );
         } else {
@@ -275,7 +280,7 @@ fn parse_arguments(
                             ArgumentValueType::None => (),
                         }
                     }
-                    None => match spec.positional_argument_name {
+                    None => match positional_argument_name {
                         // current value is not a new argument key and we are not in a scope of some argument
                         // so it must be a positional argument
                         Some(ref name) => {
