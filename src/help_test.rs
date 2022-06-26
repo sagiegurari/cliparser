@@ -51,6 +51,15 @@ fn version_all() {
 }
 
 #[test]
+fn help_empty() {
+    let cli_spec = CliSpec::new();
+
+    let text = help(&cli_spec);
+
+    assert_eq!(text, "\n");
+}
+
+#[test]
 fn help_all_types() {
     let mut cli_spec = CliSpec::new();
     cli_spec.meta_info = Some(CliSpecMetaInfo {
