@@ -61,18 +61,33 @@ pub(crate) fn help(spec: &CliSpec) -> String {
         buffer.push_str("\n\n");
     }
 
-    append_usage_line(spec, &mut buffer);
-    append_args_line(spec, &mut buffer);
-    append_options_line(spec, &mut buffer);
+    if append_usage_line(spec, &mut buffer) {
+        buffer.push_str("\n\n");
+    }
+    if append_args_line(spec, &mut buffer) {
+        buffer.push_str("\n\n");
+    }
+    if append_options_block(spec, &mut buffer) {
+        buffer.push_str("\n\n");
+    }
 
-    // TODO append post help text
+    match spec.meta_info {
+        Some(ref meta_info) => match meta_info.help_post_text {
+            Some(ref text) => buffer.push_str(text),
+            None => (),
+        },
+        None => (),
+    }
 
-    buffer // todo fix this
+    buffer = buffer.trim().to_string();
+    buffer.push_str("\n");
+
+    buffer
 }
 
-fn append_usage_line(spec: &CliSpec, buffer: &mut String) {
+fn append_usage_line(spec: &CliSpec, buffer: &mut String) -> bool {
     if spec.command.is_empty() && spec.arguments.is_empty() && spec.positional_argument.is_none() {
-        return;
+        return false;
     }
 
     buffer.push_str("USAGE:\n    ");
@@ -117,9 +132,11 @@ fn append_usage_line(spec: &CliSpec, buffer: &mut String) {
         buffer.push_str(&name);
         buffer.push_str(">...]");
     }
+
+    true
 }
 
-fn append_args_line(spec: &CliSpec, buffer: &mut String) {
+fn append_args_line(spec: &CliSpec, buffer: &mut String) -> bool {
     if let Some(ref positional_argument_spec) = spec.positional_argument {
         let name = get_positional_argument_value_name(positional_argument_spec);
 
@@ -135,10 +152,14 @@ fn append_args_line(spec: &CliSpec, buffer: &mut String) {
                 ArgumentHelp::TextAndParam(text, _) => buffer.push_str(text),
             }
         }
+
+        true
+    } else {
+        false
     }
 }
 
-fn append_options_line(spec: &CliSpec, buffer: &mut String) {
+fn append_options_block(spec: &CliSpec, buffer: &mut String) -> bool {
     if !spec.arguments.is_empty() {
         let mut names = vec![];
         let mut max_width = 0;
@@ -174,6 +195,10 @@ fn append_options_line(spec: &CliSpec, buffer: &mut String) {
         let mut index = 0;
         let help_offset = max_width + 4;
         for argument in &spec.arguments {
+            if index > 0 {
+                buffer.push_str("\n");
+            }
+
             let help_text = match argument.help {
                 Some(ref help) => match help {
                     ArgumentHelp::Text(ref text) => text.to_string(),
@@ -183,15 +208,18 @@ fn append_options_line(spec: &CliSpec, buffer: &mut String) {
             };
 
             let line = format!(
-                "{:<help_offset$}{}\n",
+                "{:<help_offset$}{}",
                 &names[index],
                 &help_text,
                 help_offset = help_offset
             );
-            buffer.push_str(&line);
+            buffer.push_str(&line.trim_end());
             index = index + 1;
         }
-        // TODO IMPL
+
+        true
+    } else {
+        false
     }
 }
 

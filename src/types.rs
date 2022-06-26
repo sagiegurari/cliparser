@@ -126,6 +126,8 @@ pub struct CliSpecMetaInfo {
     pub description: Option<String>,
     /// Project name
     pub project: Option<String>,
+    /// Post help text
+    pub help_post_text: Option<String>,
 }
 
 impl CliSpecMetaInfo {

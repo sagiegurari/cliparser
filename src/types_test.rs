@@ -32,6 +32,7 @@ fn clispecmetainfo_new() {
     assert!(meta_info.version.is_none());
     assert!(meta_info.description.is_none());
     assert!(meta_info.project.is_none());
+    assert!(meta_info.help_post_text.is_none());
 }
 
 #[test]

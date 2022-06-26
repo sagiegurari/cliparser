@@ -177,6 +177,9 @@
 //!         version: Some("1.2.3-beta".to_string()),
 //!         description: Some("Amazing example".to_string()),
 //!         project: Some("example".to_string()),
+//!         help_post_text: Some(
+//!             "See more info at: https://github.com/sagiegurari/cargo-make".to_string(),
+//!         ),
 //!     });
 //!
 //!     // Define the prefix of the arguments.
@@ -386,6 +389,9 @@ use crate::types::{CliParsed, CliSpec, ParserError};
 ///         version: Some("1.2.3-beta".to_string()),
 ///         description: Some("Amazing example".to_string()),
 ///         project: Some("example".to_string()),
+///         help_post_text: Some(
+///             "See more info at: https://github.com/sagiegurari/cargo-make".to_string(),
+///         ),
 ///     });
 ///
 ///     // Define the prefix of the arguments.
