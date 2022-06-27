@@ -200,17 +200,33 @@ fn append_options_block(spec: &CliSpec, buffer: &mut String) -> bool {
             }
 
             let help_text = match argument.help {
-                Some(ref help) => match help {
-                    ArgumentHelp::Text(ref text) => text.to_string(),
-                    ArgumentHelp::TextAndParam(ref text, _) => text.to_string(),
-                },
+                Some(ref help) => {
+                    let mut text = match help {
+                        ArgumentHelp::Text(ref text) => text.to_string(),
+                        ArgumentHelp::TextAndParam(ref text, _) => text.to_string(),
+                    };
+                    if !text.is_empty() {
+                        text.push_str(" ");
+                    }
+
+                    text
+                }
                 None => "".to_string(),
             };
 
+            let default_text = match argument.value_type {
+                ArgumentValueType::None => "".to_string(),
+                _ => match argument.default_value {
+                    Some(ref value) => format!("[default: {}]", value),
+                    None => "".to_string(),
+                },
+            };
+
             let line = format!(
-                "{:<help_offset$}{}",
+                "{:<help_offset$}{}{}",
                 &names[index],
                 &help_text,
+                &default_text,
                 help_offset = help_offset
             );
             buffer.push_str(&line.trim_end());

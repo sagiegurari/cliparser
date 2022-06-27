@@ -126,7 +126,15 @@ fn help_all_types() {
         key: vec!["--nh".to_string()],
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::Single,
-        default_value: Some("some default".to_string()),
+        default_value: None,
+        help: None,
+    });
+    cli_spec.arguments.push(Argument {
+        name: "nohelp_with_default".to_string(),
+        key: vec!["--nh2".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: Some("TEST".to_string()),
         help: None,
     });
     cli_spec.positional_argument = Some(PositionalArgument {
@@ -152,12 +160,13 @@ ARGS:
     <ARGS>    helps a lot
 
 OPTIONS:
-    --flag, -f            A flag
-    --s1 <single>         A single value arg
-    --mo1, -mo2 <mo>      A multi occurrence arg
-    --mv1, -mv2 <mv>      A multi value arg
-    --d1, -d <default>    A default value arg
+    --flag, -f                     A flag
+    --s1 <single>                  A single value arg
+    --mo1, -mo2 <mo>               A multi occurrence arg
+    --mv1, -mv2 <mv>               A multi value arg
+    --d1, -d <default>             A default value arg [default: some default]
     --nh <nohelp>
+    --nh2 <nohelp_with_default>    [default: TEST]
 
 See more info at: https://github.com/sagiegurari/cargo-make
 "#
@@ -431,7 +440,15 @@ fn append_options_block_all_types() {
         key: vec!["--nh".to_string()],
         argument_occurrence: ArgumentOccurrence::Single,
         value_type: ArgumentValueType::Single,
-        default_value: Some("some default".to_string()),
+        default_value: None,
+        help: None,
+    });
+    cli_spec.arguments.push(Argument {
+        name: "nohelp_with_default".to_string(),
+        key: vec!["--nh2".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: Some("TEST".to_string()),
         help: None,
     });
 
@@ -441,12 +458,13 @@ fn append_options_block_all_types() {
     assert_eq!(
         text,
         r#"OPTIONS:
-    --flag, -f            A flag
-    --s1 <single>         A single value arg
-    --mo1, -mo2 <mo>      A multi occurrence arg
-    --mv1, -mv2 <mv>      A multi value arg
-    --d1, -d <default>    A default value arg
-    --nh <nohelp>"#
+    --flag, -f                     A flag
+    --s1 <single>                  A single value arg
+    --mo1, -mo2 <mo>               A multi occurrence arg
+    --mv1, -mv2 <mv>               A multi value arg
+    --d1, -d <default>             A default value arg [default: some default]
+    --nh <nohelp>
+    --nh2 <nohelp_with_default>    [default: TEST]"#
     );
 }
 
