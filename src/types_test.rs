@@ -123,3 +123,30 @@ fn cliparsed_new() {
     assert!(cli_parsed.arguments.is_empty());
     assert!(cli_parsed.argument_values.is_empty());
 }
+
+#[test]
+fn cliparsed_get_first_none() {
+    let cli_parsed = CliParsed::new();
+
+    assert!(cli_parsed.get_first_value("test").is_none());
+}
+
+#[test]
+fn cliparsed_get_first_empty() {
+    let mut cli_parsed = CliParsed::new();
+    cli_parsed
+        .argument_values
+        .insert("test".to_string(), vec![]);
+
+    assert!(cli_parsed.get_first_value("test").is_none());
+}
+
+#[test]
+fn cliparsed_get_first_multiple() {
+    let mut cli_parsed = CliParsed::new();
+    cli_parsed
+        .argument_values
+        .insert("test".to_string(), vec!["1".to_string(), "2".to_string()]);
+
+    assert_eq!(cli_parsed.get_first_value("test").unwrap(), "1");
+}

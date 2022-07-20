@@ -208,4 +208,19 @@ impl CliParsed {
     pub fn new() -> CliParsed {
         Default::default()
     }
+
+    /// returns the first value (if exists)
+    pub fn get_first_value(&self, key: &str) -> Option<String> {
+        match self.argument_values.get(key) {
+            Some(ref values) => {
+                if values.len() == 0 {
+                    None
+                } else {
+                    let first_value = values.first().clone().unwrap();
+                    Some(first_value.to_string())
+                }
+            }
+            None => None,
+        }
+    }
 }
