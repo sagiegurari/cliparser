@@ -46,6 +46,77 @@ fn clispec_new() {
 }
 
 #[test]
+fn clispec_builder_function() {
+    let mut cli_spec1 = CliSpec::new();
+    cli_spec1 = cli_spec1
+        .set_meta_info(Some(CliSpecMetaInfo {
+            author: Some("Sagie Gur-Ari".to_string()),
+            version: Some("1.2.3-beta".to_string()),
+            description: Some("Amazing example".to_string()),
+            project: Some("example".to_string()),
+            help_post_text: Some(
+                "See more info at: https://github.com/sagiegurari/cargo-make".to_string(),
+            ),
+        }))
+        .add_command("makers")
+        .add_subcommand(vec!["cargo", "make"])
+        .set_positional_argument(Some(PositionalArgument {
+            name: "args".to_string(),
+            help: Some(ArgumentHelp::TextAndParam(
+                "The command line arguments".to_string(),
+                "ARGS".to_string(),
+            )),
+        }))
+        .add_argument(Argument {
+            name: "flag".to_string(),
+            key: vec!["--flag".to_string(), "-f".to_string()],
+            argument_occurrence: ArgumentOccurrence::Single,
+            value_type: ArgumentValueType::None,
+            default_value: None,
+            help: Some(ArgumentHelp::Text(
+                "A flag without value example".to_string(),
+            )),
+        });
+
+    let mut cli_spec2 = CliSpec::new();
+    cli_spec2.meta_info = Some(CliSpecMetaInfo {
+        author: Some("Sagie Gur-Ari".to_string()),
+        version: Some("1.2.3-beta".to_string()),
+        description: Some("Amazing example".to_string()),
+        project: Some("example".to_string()),
+        help_post_text: Some(
+            "See more info at: https://github.com/sagiegurari/cargo-make".to_string(),
+        ),
+    });
+    cli_spec2
+        .command
+        .push(Command::Command("makers".to_string()));
+    cli_spec2.command.push(Command::SubCommand(vec![
+        "cargo".to_string(),
+        "make".to_string(),
+    ]));
+    cli_spec2.positional_argument = Some(PositionalArgument {
+        name: "args".to_string(),
+        help: Some(ArgumentHelp::TextAndParam(
+            "The command line arguments".to_string(),
+            "ARGS".to_string(),
+        )),
+    });
+    cli_spec2.arguments.push(Argument {
+        name: "flag".to_string(),
+        key: vec!["--flag".to_string(), "-f".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::None,
+        default_value: None,
+        help: Some(ArgumentHelp::Text(
+            "A flag without value example".to_string(),
+        )),
+    });
+
+    assert_eq!(cli_spec1, cli_spec2);
+}
+
+#[test]
 fn cliparsed_new() {
     let cli_parsed = CliParsed::new();
 

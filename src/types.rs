@@ -156,6 +156,37 @@ impl CliSpec {
     pub fn new() -> CliSpec {
         Default::default()
     }
+
+    /// Sets the spec meta info
+    pub fn set_meta_info(mut self, meta_info: Option<CliSpecMetaInfo>) -> Self {
+        self.meta_info = meta_info;
+        self
+    }
+
+    /// Adds a command to the spec
+    pub fn add_command(mut self, command: &str) -> Self {
+        self.command.push(Command::Command(command.to_string()));
+        self
+    }
+
+    /// Adds a sub command to the spec
+    pub fn add_subcommand(mut self, sub_command: Vec<&str>) -> Self {
+        let string_vec = sub_command.iter().map(|value| value.to_string()).collect();
+        self.command.push(Command::SubCommand(string_vec));
+        self
+    }
+
+    /// Sets the PositionalArgument
+    pub fn set_positional_argument(mut self, argument: Option<PositionalArgument>) -> Self {
+        self.positional_argument = argument;
+        self
+    }
+
+    /// Adds a Argument
+    pub fn add_argument(mut self, argument: Argument) -> Self {
+        self.arguments.push(argument);
+        self
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
