@@ -1,0 +1,11 @@
+
+[config]
+additional_profiles = [
+  "all-default-tasks",
+  "multi-phase-tests",
+  "docs-all-modification-tasks",
+  "ci-coverage-tasks",
+  "ci-all-build-tasks",
+  "ci-static-code-analysis-tasks",
+  "publish-pre-cleanup",
+]

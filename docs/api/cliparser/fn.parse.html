@@ -1,0 +1,188 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Parsers the given command line based on the given spec and returns the result. In case of error (such as invalid input), an error will be returned. In case the command line does not match the spec, Ok(None) will be returned."><meta name="keywords" content="rust, rustlang, rust-lang, parse"><title>parse in cliparser - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><script defer src="../main.js"></script>
+    <noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../cliparser/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../cliparser/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><div class="sidebar-elems"><h2 class="location"><a href="index.html">In cliparser</a></h2><div id="sidebar-vars" data-name="parse" data-ty="fn" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../cliparser/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Function <a href="index.html">cliparser</a>::<wbr><a class="fn" href="#">parse</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/cliparser/lib.rs.html#551-553">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><pre class="rust fn"><code>pub fn parse(<br>&nbsp;&nbsp;&nbsp;&nbsp;command_line: &amp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;&amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, <br>&nbsp;&nbsp;&nbsp;&nbsp;spec: &amp;<a class="struct" href="types/struct.CliSpec.html" title="struct cliparser::types::CliSpec">CliSpec</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="types/struct.CliParsed.html" title="struct cliparser::types::CliParsed">CliParsed</a>, <a class="enum" href="types/enum.ParserError.html" title="enum cliparser::types::ParserError">ParserError</a>&gt;</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Parsers the given command line based on the given spec and returns the result.<br>
+In case of error (such as invalid input), an error will be returned.<br>
+In case the command line does not match the spec, Ok(None) will be returned.</p>
+<h2 id="example"><a href="#example">Example</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">cliparser::types</span>::{
+    <span class="ident">Argument</span>, <span class="ident">ArgumentHelp</span>, <span class="ident">ArgumentOccurrence</span>, <span class="ident">ArgumentValueType</span>, <span class="ident">CliSpec</span>, <span class="ident">CliSpecMetaInfo</span>,
+    <span class="ident">Command</span>, <span class="ident">PositionalArgument</span>,
+};
+<span class="kw">use</span> <span class="ident">cliparser</span>::{<span class="ident">help</span>, <span class="ident">parse</span>, <span class="ident">version</span>};
+<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cli_spec</span> <span class="op">=</span> <span class="ident">CliSpec::new</span>();
+
+    <span class="comment">// Add meta info to support help and version text generation</span>
+    <span class="ident">cli_spec</span>.<span class="ident">meta_info</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">CliSpecMetaInfo</span> {
+        <span class="ident">author</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;Sagie Gur-Ari&quot;</span>.<span class="ident">to_string</span>()),
+        <span class="ident">version</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;1.2.3-beta&quot;</span>.<span class="ident">to_string</span>()),
+        <span class="ident">description</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;Amazing example&quot;</span>.<span class="ident">to_string</span>()),
+        <span class="ident">project</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;example&quot;</span>.<span class="ident">to_string</span>()),
+        <span class="ident">help_post_text</span>: <span class="prelude-val">Some</span>(
+            <span class="string">&quot;See more info at: https://github.com/sagiegurari/cargo-make&quot;</span>.<span class="ident">to_string</span>(),
+        ),
+    });
+
+    <span class="comment">// Define the prefix of the arguments.</span>
+    <span class="comment">// It can be a command/s (path prefix ignored) and/or a sub command/s</span>
+    <span class="comment">// If not defined, the parsing will start checking the arguments only.</span>
+    <span class="comment">// In this example, the spec defines two ways to invoke a process, either</span>
+    <span class="comment">// as &#39;makers&#39; or as &#39;cargo make&#39; and afterwards the arguments.</span>
+    <span class="ident">cli_spec</span>
+        .<span class="ident">command</span>
+        .<span class="ident">push</span>(<span class="ident">Command::Command</span>(<span class="string">&quot;makers&quot;</span>.<span class="ident">to_string</span>()));
+    <span class="ident">cli_spec</span>.<span class="ident">command</span>.<span class="ident">push</span>(<span class="ident">Command::SubCommand</span>(<span class="macro">vec!</span>[
+        <span class="string">&quot;cargo&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="string">&quot;make&quot;</span>.<span class="ident">to_string</span>(),
+    ]));
+
+    <span class="comment">// Positional arguments come after all the known argument keys.</span>
+    <span class="comment">// If the positional is None, positional arguments are not allowed.</span>
+    <span class="comment">// Add -- to the command line forces positional arguments and stops key</span>
+    <span class="comment">// based argument parsing.</span>
+    <span class="ident">cli_spec</span>.<span class="ident">positional_argument</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">PositionalArgument</span> {
+        <span class="ident">name</span>: <span class="string">&quot;args&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="ident">help</span>: <span class="prelude-val">Some</span>(<span class="ident">ArgumentHelp::TextAndParam</span>(
+            <span class="string">&quot;The command line arguments&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="string">&quot;ARGS&quot;</span>.<span class="ident">to_string</span>(),
+        )),
+    });
+
+    <span class="comment">// Add a &#39;flag&#39; only argument which is an argument that does not accept any value.</span>
+    <span class="comment">// You can define multiple variations of the parameter name.</span>
+    <span class="comment">// For example, in this case putting --flag or -f in the command line would be parsed</span>
+    <span class="comment">// as the &#39;flag&#39; parameter.</span>
+    <span class="ident">cli_spec</span>.<span class="ident">arguments</span>.<span class="ident">push</span>(<span class="ident">Argument</span> {
+        <span class="ident">name</span>: <span class="string">&quot;flag&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="ident">key</span>: <span class="macro">vec!</span>[<span class="string">&quot;--flag&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;-f&quot;</span>.<span class="ident">to_string</span>()],
+        <span class="ident">argument_occurrence</span>: <span class="ident">ArgumentOccurrence::Single</span>,
+        <span class="ident">value_type</span>: <span class="ident">ArgumentValueType::None</span>,
+        <span class="ident">default_value</span>: <span class="prelude-val">None</span>,
+        <span class="ident">help</span>: <span class="prelude-val">Some</span>(<span class="ident">ArgumentHelp::Text</span>(
+            <span class="string">&quot;A flag without value example&quot;</span>.<span class="ident">to_string</span>(),
+        )),
+    });
+
+    <span class="comment">// Add an argument that accepts a single value, for example -s value</span>
+    <span class="ident">cli_spec</span>.<span class="ident">arguments</span>.<span class="ident">push</span>(<span class="ident">Argument</span> {
+        <span class="ident">name</span>: <span class="string">&quot;single&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="ident">key</span>: <span class="macro">vec!</span>[<span class="string">&quot;--s1&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;-s&quot;</span>.<span class="ident">to_string</span>()],
+        <span class="ident">argument_occurrence</span>: <span class="ident">ArgumentOccurrence::Single</span>,
+        <span class="ident">value_type</span>: <span class="ident">ArgumentValueType::Single</span>,
+        <span class="ident">default_value</span>: <span class="prelude-val">None</span>,
+        <span class="ident">help</span>: <span class="prelude-val">Some</span>(<span class="ident">ArgumentHelp::Text</span>(
+            <span class="string">&quot;A parameter with single value example&quot;</span>.<span class="ident">to_string</span>(),
+        )),
+    });
+
+    <span class="comment">// Add an argument that accepts multiple values</span>
+    <span class="ident">cli_spec</span>.<span class="ident">arguments</span>.<span class="ident">push</span>(<span class="ident">Argument</span> {
+        <span class="ident">name</span>: <span class="string">&quot;mo&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="ident">key</span>: <span class="macro">vec!</span>[<span class="string">&quot;--mo1&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;-mo2&quot;</span>.<span class="ident">to_string</span>()],
+        <span class="ident">argument_occurrence</span>: <span class="ident">ArgumentOccurrence::Multiple</span>,
+        <span class="ident">value_type</span>: <span class="ident">ArgumentValueType::Single</span>,
+        <span class="ident">default_value</span>: <span class="prelude-val">None</span>,
+        <span class="ident">help</span>: <span class="prelude-val">Some</span>(<span class="ident">ArgumentHelp::Text</span>(
+            <span class="string">&quot;A parameter with multiple values example&quot;</span>.<span class="ident">to_string</span>(),
+        )),
+    });
+
+    <span class="comment">// Add an argument that can appear multiple times.</span>
+    <span class="comment">// Even if the value type if Single, multiple occurrences will</span>
+    <span class="comment">// enable the argument to collect multiple values (one for each occurrence).</span>
+    <span class="ident">cli_spec</span>.<span class="ident">arguments</span>.<span class="ident">push</span>(<span class="ident">Argument</span> {
+        <span class="ident">name</span>: <span class="string">&quot;mv&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="ident">key</span>: <span class="macro">vec!</span>[<span class="string">&quot;--mv1&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;-mv2&quot;</span>.<span class="ident">to_string</span>()],
+        <span class="ident">argument_occurrence</span>: <span class="ident">ArgumentOccurrence::Single</span>,
+        <span class="ident">value_type</span>: <span class="ident">ArgumentValueType::Multiple</span>,
+        <span class="ident">default_value</span>: <span class="prelude-val">None</span>,
+        <span class="ident">help</span>: <span class="prelude-val">Some</span>(<span class="ident">ArgumentHelp::Text</span>(
+            <span class="string">&quot;A parameter with single value but can appear multiple times example&quot;</span>.<span class="ident">to_string</span>(),
+        )),
+    });
+
+    <span class="comment">// We can define a &#39;default&#39; value.</span>
+    <span class="comment">// In case the argument is not in the command line, we will get the default value.</span>
+    <span class="comment">// However, the argument names list in the parsed struct will not include this</span>
+    <span class="comment">// argument as it was not found. Only the argument values will contain it.</span>
+    <span class="comment">// This is a good way to understand that we have a value but it was not entered by the caller.</span>
+    <span class="ident">cli_spec</span>.<span class="ident">arguments</span>.<span class="ident">push</span>(<span class="ident">Argument</span> {
+        <span class="ident">name</span>: <span class="string">&quot;default&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="ident">key</span>: <span class="macro">vec!</span>[<span class="string">&quot;--d1&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;-d&quot;</span>.<span class="ident">to_string</span>()],
+        <span class="ident">argument_occurrence</span>: <span class="ident">ArgumentOccurrence::Single</span>,
+        <span class="ident">value_type</span>: <span class="ident">ArgumentValueType::Single</span>,
+        <span class="ident">default_value</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;some default&quot;</span>.<span class="ident">to_string</span>()),
+        <span class="ident">help</span>: <span class="prelude-val">Some</span>(<span class="ident">ArgumentHelp::Text</span>(
+            <span class="string">&quot;A parameter with default value example&quot;</span>.<span class="ident">to_string</span>(),
+        )),
+    });
+
+    <span class="comment">// Parsers the given command line based on the given spec and returns the result.</span>
+    <span class="comment">// In case of invalid input or the provided spec does not match the command line, an error will be returned.</span>
+    <span class="comment">// In order to parse the process command line instead of providing it, use the parse_process.</span>
+    <span class="comment">// Also, if you want to provide multiple specs and have each one checked, until the first one</span>
+    <span class="comment">// which fits is found, use the parse_any and parse_process_any functions.</span>
+    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">parse</span>(
+        <span class="kw-2">&amp;</span><span class="macro">vec!</span>[
+            <span class="string">&quot;cargo&quot;</span>, <span class="string">&quot;make&quot;</span>, <span class="string">&quot;-mv2&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="string">&quot;5&quot;</span>, <span class="string">&quot;6&quot;</span>, <span class="string">&quot;--mo1&quot;</span>, <span class="string">&quot;1&quot;</span>, <span class="string">&quot;-mo2&quot;</span>, <span class="string">&quot;2&quot;</span>, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;-s&quot;</span>, <span class="string">&quot;3&quot;</span>,
+            <span class="string">&quot;arg1&quot;</span>, <span class="string">&quot;arg2&quot;</span>, <span class="string">&quot;-mo2&quot;</span>, <span class="string">&quot;arg5&quot;</span>,
+        ],
+        <span class="kw-2">&amp;</span><span class="ident">cli_spec</span>,
+    );
+
+    <span class="comment">// The CliParsed struct includes multiple members that define what was found</span>
+    <span class="comment">// arguments - A collection of all arguments found (list of names not keys).</span>
+    <span class="comment">// Arguments that were not found by defaulted to a given value will not be listed here.</span>
+    <span class="comment">// argument_values - A map of all values for arguments found.</span>
+    <span class="comment">// The map will exclude arguments that do not accept value but include arguments not provided</span>
+    <span class="comment">// on the command line but were defaulted to a given value.</span>
+    <span class="comment">// The map keys are the argument names (not keys) and the value is the list of all values</span>
+    <span class="comment">// found for all occurrences.</span>
+    <span class="macro">assert!</span>(<span class="ident">result</span>.<span class="ident">is_ok</span>());
+    <span class="kw">let</span> <span class="ident">cli_parsed</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">unwrap</span>();
+    <span class="macro">println!</span>(<span class="string">&quot;Cli Parsed:\n{:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">cli_parsed</span>);
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">argument_names</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+    <span class="ident">argument_names</span>.<span class="ident">insert</span>(<span class="string">&quot;flag&quot;</span>.<span class="ident">to_string</span>());
+    <span class="ident">argument_names</span>.<span class="ident">insert</span>(<span class="string">&quot;single&quot;</span>.<span class="ident">to_string</span>());
+    <span class="ident">argument_names</span>.<span class="ident">insert</span>(<span class="string">&quot;mo&quot;</span>.<span class="ident">to_string</span>());
+    <span class="ident">argument_names</span>.<span class="ident">insert</span>(<span class="string">&quot;mv&quot;</span>.<span class="ident">to_string</span>());
+    <span class="ident">argument_names</span>.<span class="ident">insert</span>(<span class="string">&quot;args&quot;</span>.<span class="ident">to_string</span>());
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">argument_values</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
+    <span class="ident">argument_values</span>.<span class="ident">insert</span>(<span class="string">&quot;single&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">vec!</span>[<span class="string">&quot;3&quot;</span>.<span class="ident">to_string</span>()]);
+    <span class="ident">argument_values</span>.<span class="ident">insert</span>(<span class="string">&quot;mo&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">vec!</span>[<span class="string">&quot;1&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;2&quot;</span>.<span class="ident">to_string</span>()]);
+    <span class="ident">argument_values</span>.<span class="ident">insert</span>(
+        <span class="string">&quot;mv&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="macro">vec!</span>[<span class="string">&quot;4&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;5&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;6&quot;</span>.<span class="ident">to_string</span>()],
+    );
+    <span class="ident">argument_values</span>.<span class="ident">insert</span>(
+        <span class="string">&quot;args&quot;</span>.<span class="ident">to_string</span>(),
+        <span class="macro">vec!</span>[
+            <span class="string">&quot;arg1&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="string">&quot;arg2&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="string">&quot;-mo2&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="string">&quot;arg5&quot;</span>.<span class="ident">to_string</span>(),
+        ],
+    );
+    <span class="ident">argument_values</span>.<span class="ident">insert</span>(<span class="string">&quot;default&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">vec!</span>[<span class="string">&quot;some default&quot;</span>.<span class="ident">to_string</span>()]);
+    <span class="macro">assert_eq!</span>(<span class="ident">cli_parsed</span>.<span class="ident">arguments</span>, <span class="ident">argument_names</span>);
+    <span class="macro">assert_eq!</span>(<span class="ident">cli_parsed</span>.<span class="ident">argument_values</span>, <span class="ident">argument_values</span>);
+
+    <span class="comment">// generate help text</span>
+    <span class="kw">let</span> <span class="ident">help_text</span> <span class="op">=</span> <span class="ident">help</span>(<span class="kw-2">&amp;</span><span class="ident">cli_spec</span>);
+    <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">help_text</span>);
+
+    <span class="comment">// generate version text</span>
+    <span class="kw">let</span> <span class="ident">version_text</span> <span class="op">=</span> <span class="ident">version</span>(<span class="kw-2">&amp;</span><span class="ident">cli_spec</span>);
+    <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">version_text</span>);
+}</code></pre></div>
+</div></details></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="cliparser" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ec55c6130 2022-06-10)" ></div>
+</body></html>
