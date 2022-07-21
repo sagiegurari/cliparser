@@ -197,7 +197,7 @@ In order to use this library, just add it as a dependency:
 
 ```ini
 [dependencies]
-cliparser = "^0.1.0"
+cliparser = "^0.1.1"
 ```
 
 ## API Documentation

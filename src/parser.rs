@@ -11,7 +11,7 @@ use crate::types::{
     Argument, ArgumentOccurrence, ArgumentValueType, CliParsed, CliSpec, Command, ParserError,
 };
 use std::env;
-use std::ffi::OsStr;
+use std::ffi::{OsStr, OsString};
 use std::path::Path;
 
 /// Parsers the given command line based on the given spec and returns the result.<br>
@@ -119,13 +119,21 @@ fn insert_default_values(spec: &CliSpec, cli_parsed: &mut CliParsed) {
     }
 }
 
+fn get_filename_without_extension(command: &str) -> Option<OsString> {
+    let path_value = Path::new(command);
+    match path_value.file_stem() {
+        Some(filename) => Some(filename.to_os_string()),
+        None => None,
+    }
+}
+
 fn parse_command(command_line: &Vec<&str>, spec: &CliSpec) -> (bool, usize) {
     if spec.command.is_empty() {
         return (true, 0);
     }
 
     let root_command_with_path = command_line[0];
-    match Path::new(root_command_with_path).file_name() {
+    match get_filename_without_extension(root_command_with_path) {
         Some(root_command_file_name) => {
             for command in &spec.command {
                 match command {

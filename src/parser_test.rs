@@ -462,6 +462,16 @@ fn parse_command_match_command_ignore_path() {
 }
 
 #[test]
+fn parse_command_match_command_ignore_extension() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.command.push(Command::Command("test".to_string()));
+    let (valid, index) = parse_command(&vec!["./bin/dir/test.exe"], &cli_spec);
+
+    assert!(valid);
+    assert_eq!(index, 1);
+}
+
+#[test]
 fn parse_command_no_match_command() {
     let mut cli_spec = CliSpec::new();
     cli_spec.command.push(Command::Command("test".to_string()));
@@ -494,6 +504,19 @@ fn parse_command_match_subcommand_ignore_path() {
         "test".to_string(),
     ]));
     let (valid, index) = parse_command(&vec!["./bin/dir/cargo", "test"], &cli_spec);
+
+    assert!(valid);
+    assert_eq!(index, 2);
+}
+
+#[test]
+fn parse_command_match_subcommand_ignore_extension() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.command.push(Command::SubCommand(vec![
+        "cargo".to_string(),
+        "test".to_string(),
+    ]));
+    let (valid, index) = parse_command(&vec!["./bin/dir/cargo.exe", "test"], &cli_spec);
 
     assert!(valid);
     assert_eq!(index, 2);
