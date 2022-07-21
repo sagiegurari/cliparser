@@ -516,7 +516,7 @@ fn parse_command_match_subcommand_ignore_extension() {
         "cargo".to_string(),
         "test".to_string(),
     ]));
-    let (valid, index) = parse_command(&vec!["./bin/dir/cargo.exe", "test"], &cli_spec);
+    let (valid, index) = parse_command(&vec!["dir1\\dir2\\cargo.exe", "test"], &cli_spec);
 
     assert!(valid);
     assert_eq!(index, 2);

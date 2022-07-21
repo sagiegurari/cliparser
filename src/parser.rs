@@ -120,7 +120,8 @@ fn insert_default_values(spec: &CliSpec, cli_parsed: &mut CliParsed) {
 }
 
 fn get_filename_without_extension(command: &str) -> Option<OsString> {
-    let path_value = Path::new(command);
+    let unix_path = command.replace("\\", "/");
+    let path_value = Path::new(&unix_path);
     match path_value.file_stem() {
         Some(filename) => Some(filename.to_os_string()),
         None => None,
