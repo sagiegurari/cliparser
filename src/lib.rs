@@ -272,7 +272,7 @@
 //!     // which fits is found, use the parse_any and parse_process_any functions.
 //!     let result = parse(
 //!         &vec![
-//!             "cargo", "make", "-mv2", "4", "5", "6", "--mo1", "1", "-mo2", "2", "-f", "-s", "3",
+//!             "cargo", "make", "-mv2", "4", "5", "6", "--mo1=1", "-mo2", "2", "-f", "-s", "3",
 //!             "arg1", "arg2", "-mo2", "arg5",
 //!         ],
 //!         &cli_spec,
@@ -473,7 +473,7 @@ use crate::types::{CliParsed, CliSpec, ParserError};
 ///     // which fits is found, use the parse_any and parse_process_any functions.
 ///     let result = parse(
 ///         &vec![
-///             "cargo", "make", "-mv2", "4", "5", "6", "--mo1", "1", "-mo2", "2", "-f", "-s", "3",
+///             "cargo", "make", "-mv2", "4", "5", "6", "--mo1=1", "-mo2", "2", "-f", "-s", "3",
 ///             "arg1", "arg2", "-mo2", "arg5",
 ///         ],
 ///         &cli_spec,

@@ -25,7 +25,11 @@ pub(crate) fn parse(command_line: &Vec<&str>, spec: &CliSpec) -> Result<CliParse
     let (valid, args_start_index) = parse_command(&command_line, spec);
     if !valid {
         return Err(ParserError::InvalidCommandLine(
-            "Command does not match spec".to_string(),
+            format!(
+                "Command does not match spec, command line: {:?}",
+                command_line
+            )
+            .to_string(),
         ));
     }
 
@@ -208,11 +212,27 @@ fn parse_arguments(
 
             // search for argument in arguments spec
             let mut argument_spec_found = None;
+            let argument_key_value_parts = argument_raw.split_once("=");
+            let mut argument_with_value = false;
             for argument_spec in &spec.arguments {
                 for key in &argument_spec.key {
                     if key == argument_raw {
                         argument_spec_found = Some(argument_spec);
                         break;
+                    } else {
+                        if argument_spec.value_type == ArgumentValueType::Single {
+                            match argument_key_value_parts {
+                                Some(ref parts) => {
+                                    let (key_prefix, _) = parts;
+                                    if key == key_prefix {
+                                        argument_spec_found = Some(argument_spec);
+                                        argument_with_value = true;
+                                        break;
+                                    }
+                                }
+                                None => (),
+                            }
+                        }
                     }
                 }
             }
@@ -239,6 +259,16 @@ fn parse_arguments(
                                 argument_spec_in_scope = Some(found_argument_spec.clone());
                             }
                             ArgumentValueType::None => (),
+                        }
+
+                        if argument_with_value {
+                            let (_, value_part) = argument_key_value_parts.unwrap();
+                            insert_argument_value(
+                                cli_parsed,
+                                &found_argument_spec.name,
+                                value_part,
+                            );
+                            argument_spec_in_scope = None;
                         }
                     }
                     None => {
@@ -278,6 +308,16 @@ fn parse_arguments(
                                 argument_spec_in_scope = Some(found_argument_spec.clone());
                             }
                             ArgumentValueType::None => (),
+                        }
+
+                        if argument_with_value {
+                            let (_, value_part) = argument_key_value_parts.unwrap();
+                            insert_argument_value(
+                                cli_parsed,
+                                &found_argument_spec.name,
+                                value_part,
+                            );
+                            argument_spec_in_scope = None;
                         }
                     }
                     None => match positional_argument_name {

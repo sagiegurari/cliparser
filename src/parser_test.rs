@@ -680,6 +680,31 @@ fn parse_arguments_single_value_param_only() {
 }
 
 #[test]
+fn parse_arguments_single_value_param_with_equals_only() {
+    let mut cli_spec = CliSpec::new();
+    cli_spec.arguments.push(Argument {
+        name: "testarg".to_string(),
+        key: vec!["--test".to_string()],
+        argument_occurrence: ArgumentOccurrence::Single,
+        value_type: ArgumentValueType::Single,
+        default_value: None,
+        help: None,
+    });
+
+    let mut cli_parsed = CliParsed::new();
+    let result = parse_arguments(&vec!["--test=value"], &cli_spec, &mut cli_parsed);
+
+    assert!(result.is_ok());
+
+    let mut argument_names = HashSet::new();
+    argument_names.insert("testarg".to_string());
+    let mut argument_values = HashMap::new();
+    argument_values.insert("testarg".to_string(), vec!["value".to_string()]);
+    assert_eq!(cli_parsed.arguments, argument_names);
+    assert_eq!(cli_parsed.argument_values, argument_values);
+}
+
+#[test]
 fn parse_arguments_single_value_param_only_with_multiple_values() {
     let mut cli_spec = CliSpec::new();
     cli_spec.arguments.push(Argument {
