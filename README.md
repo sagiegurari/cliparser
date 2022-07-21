@@ -21,7 +21,7 @@ It will not cover all possible use cases in order to ensure a simple thin API.
 
 <a name="usage"></a>
 ## Usage
-Simply include the library and invoke the get function to pull all info as follows:
+The following is a simple usage example (there are more capabilities, see API docs):
 
 <!--{ "examples/example.rs" | lines: 1 | code: rust }-->
 ```rust
