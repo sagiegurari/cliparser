@@ -149,8 +149,14 @@ fn parse_command(command_line: &Vec<&str>, spec: &CliSpec) -> (bool, usize) {
                             && OsStr::new(&command_strings[0]) == root_command_file_name
                         {
                             let mut found = true;
-                            for index in 1..command_strings.len() {
+                            for index in 0..command_strings.len() {
                                 if command_strings[index] != command_line[index] {
+                                    {
+                                        let base = OsStr::new(&command_strings[index]);
+                                        if base == root_command_file_name {
+                                            return (true, index + base.len());
+                                        }
+                                    }
                                     found = false;
                                     break;
                                 }
